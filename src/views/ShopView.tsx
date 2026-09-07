@@ -193,6 +193,7 @@ export const ShopView: React.FC<ShopViewProps> = ({
                 <Search className="w-3.5 h-3.5 text-[#736B66] mr-2 shrink-0" />
                 <input
                   type="text"
+                  maxLength={80}
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder="e.g. Glass, Clay, Dhamrai..."

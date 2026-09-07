@@ -9,7 +9,8 @@ import {
   CheckCircle2, 
   ChevronDown, 
   HelpCircle, 
-  Sparkles 
+  Sparkles,
+  AlertCircle 
 } from 'lucide-react';
 
 export const ContactView: React.FC = () => {
@@ -20,12 +21,39 @@ export const ContactView: React.FC = () => {
     subject: 'General Inquiry',
     message: '',
   });
+  const [errorMsg, setErrorMsg] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
+    setErrorMsg('');
+
+    const trimmedName = formData.name.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMsg('Please enter your full name.');
+      return;
+    }
+
+    const cleanPhone = formData.phone.replace(/[\s\-+]/g, '');
+    const standardPhone = cleanPhone.startsWith('880') ? cleanPhone.slice(2) : cleanPhone;
+    if (!/^01[3-9]\d{8}$/.test(standardPhone)) {
+      setErrorMsg('Please enter a valid 11-digit Bangladeshi phone number (e.g. 01712345678).');
+      return;
+    }
+
+    const trimmedEmail = formData.email.trim();
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+
+    const trimmedMessage = formData.message.trim();
+    if (!trimmedMessage || trimmedMessage.length < 5) {
+      setErrorMsg('Please enter a message of at least 5 characters.');
+      return;
+    }
+
     setSubmitted(true);
   };
 
@@ -181,6 +209,13 @@ export const ContactView: React.FC = () => {
                 </p>
               </div>
 
+              {errorMsg && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-[#332D2D] block mb-1.5">
@@ -189,6 +224,8 @@ export const ContactView: React.FC = () => {
                   <input
                     type="text"
                     required
+                    maxLength={80}
+                    autoComplete="name"
                     placeholder="e.g. Sharmin Akter"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -203,6 +240,9 @@ export const ContactView: React.FC = () => {
                   <input
                     type="tel"
                     required
+                    maxLength={15}
+                    inputMode="numeric"
+                    autoComplete="tel"
                     placeholder="e.g. 01712-345678"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -218,6 +258,8 @@ export const ContactView: React.FC = () => {
                   </label>
                   <input
                     type="email"
+                    maxLength={100}
+                    autoComplete="email"
                     placeholder="e.g. sharmin@gmail.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -250,6 +292,7 @@ export const ContactView: React.FC = () => {
                 <textarea
                   rows={4}
                   required
+                  maxLength={1000}
                   placeholder="Tell us about the bangles you're looking for, or any special requirements..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}

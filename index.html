@@ -3,6 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function() {
+        try {
+          var _fetch = window.fetch ? window.fetch.bind(window) : undefined;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() {
+              return _fetch;
+            },
+            set: function(fn) {
+              _fetch = fn;
+            }
+          });
+        } catch (e) {
+          // Ignore if descriptor cannot be defined
+        }
+      })();
+    </script>
     <title>Karighor Bangles Bangladesh</title>
     <meta name="description" content="Handmade artisan bangles from Bangladesh featuring traditional glass churi, terracotta, nakshi brass, and bridal kankan." />
     <meta property="og:title" content="Karighor Bangles Bangladesh" />

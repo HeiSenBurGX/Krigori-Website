@@ -80,24 +80,43 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setErrorMsg('');
 
-    if (!formData.name.trim()) {
-      setErrorMsg('Please enter your full name.');
-      return;
-    }
-    if (!formData.phone.trim() || formData.phone.length < 11) {
-      setErrorMsg('Please enter a valid 11-digit Bangladeshi mobile number (e.g. 017xxxxxxxx).');
-      return;
-    }
-    if (!formData.address.trim()) {
-      setErrorMsg('Please provide your complete street address for courier delivery.');
+    const trimmedName = formData.name.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMsg('Please enter your full recipient name.');
       return;
     }
 
-    if (formData.paymentMethod === 'bkash' && !formData.trxId.trim() && !formData.bkashNumber.trim()) {
-      setErrorMsg('Please enter your bKash mobile number and Transaction ID (TrxID).');
+    // Sanitize and validate Bangladeshi phone number
+    const cleanPhone = formData.phone.replace(/[\s\-+]/g, '');
+    const standardPhone = cleanPhone.startsWith('880') ? cleanPhone.slice(2) : cleanPhone;
+    if (!/^01[3-9]\d{8}$/.test(standardPhone)) {
+      setErrorMsg('Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01712345678).');
       return;
+    }
+
+    // Validate email if supplied
+    const trimmedEmail = formData.email.trim();
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setErrorMsg('Please provide a valid email address for your order invoice.');
+      return;
+    }
+
+    const trimmedAddress = formData.address.trim();
+    if (!trimmedAddress || trimmedAddress.length < 8) {
+      setErrorMsg('Please provide a complete street address (House, Road, Area) for courier delivery.');
+      return;
+    }
+
+    if (formData.paymentMethod === 'bkash') {
+      const cleanBkash = formData.bkashNumber.replace(/[\s\-+]/g, '');
+      const stdBkash = cleanBkash.startsWith('880') ? cleanBkash.slice(2) : cleanBkash;
+      if (!formData.trxId.trim() && (!stdBkash || !/^01[3-9]\d{8}$/.test(stdBkash))) {
+        setErrorMsg('Please enter your 11-digit bKash number and Transaction ID (TrxID).');
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -107,15 +126,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const orderId = `KBD-${Math.floor(100000 + Math.random() * 900000)}`;
       const order: OrderDetails = {
         orderId,
-        customerName: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        address: formData.address,
+        customerName: trimmedName,
+        phone: standardPhone,
+        email: trimmedEmail || undefined,
+        address: trimmedAddress,
         district: formData.district,
         deliveryType: formData.deliveryType,
         deliveryFee,
         paymentMethod: formData.paymentMethod,
-        transactionId: formData.trxId || undefined,
+        transactionId: formData.trxId.trim() || undefined,
         items: [...cartItems],
         subtotal,
         discount,
@@ -125,7 +144,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           month: 'long',
           day: 'numeric',
         }),
-        notes: formData.notes,
+        notes: formData.notes?.trim() || undefined,
         status: 'confirmed',
       };
 
@@ -202,6 +221,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <input
                           type="text"
                           required
+                          maxLength={80}
+                          autoComplete="name"
                           placeholder="e.g. Anika Tabassum"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -216,6 +237,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <input
                           type="tel"
                           required
+                          maxLength={15}
+                          inputMode="numeric"
+                          autoComplete="tel"
                           placeholder="e.g. 01712-345678"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -248,6 +272,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         </label>
                         <input
                           type="email"
+                          maxLength={100}
+                          autoComplete="email"
                           placeholder="e.g. anika@gmail.com"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -263,6 +289,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <textarea
                         rows={2}
                         required
+                        maxLength={300}
+                        autoComplete="street-address"
                         placeholder="e.g. House 14, Road 5, Sector 11, Uttara, Dhaka"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -412,6 +440,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                                   </label>
                                   <input
                                     type="tel"
+                                    maxLength={15}
+                                    inputMode="numeric"
                                     placeholder="01XXXXXXXXX"
                                     value={formData.bkashNumber}
                                     onChange={(e) => setFormData({ ...formData, bkashNumber: e.target.value })}
@@ -424,6 +454,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                                   </label>
                                   <input
                                     type="text"
+                                    maxLength={25}
                                     placeholder="e.g. BKT9821K9"
                                     value={formData.trxId}
                                     onChange={(e) => setFormData({ ...formData, trxId: e.target.value })}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BangleProduct, 
   BangleCategory, 
@@ -24,11 +24,26 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<BangleCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Cart & Wishlist persistence with localStorage
+  // Cart & Wishlist persistence with strict schema validation against corrupt/tampered state
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('karighor_cart');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item): item is CartItem => (
+        Boolean(item) &&
+        typeof item === 'object' &&
+        Boolean(item.product) &&
+        typeof item.product.id === 'string' &&
+        typeof item.product.name === 'string' &&
+        typeof item.product.price === 'number' &&
+        item.product.price >= 0 &&
+        typeof item.quantity === 'number' &&
+        item.quantity > 0 &&
+        item.quantity <= 100 &&
+        typeof item.selectedSize === 'string'
+      ));
     } catch {
       return [];
     }
@@ -37,7 +52,10 @@ export default function App() {
   const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('karighor_wishlist');
-      return saved ? JSON.parse(saved) : ['bangle-01', 'bangle-04'];
+      if (!saved) return ['bangle-01', 'bangle-04'];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return ['bangle-01', 'bangle-04'];
+      return parsed.filter((id): id is string => typeof id === 'string' && id.length < 50);
     } catch {
       return ['bangle-01', 'bangle-04'];
     }
@@ -52,12 +70,13 @@ export default function App() {
 
   // Toast notifications
   const [toastMessage, setToastMessage] = useState<{ text: string; icon?: 'cart' | 'wishlist' } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     try {
       localStorage.setItem('karighor_cart', JSON.stringify(cartItems));
     } catch (e) {
-      console.error(e);
+      console.warn('Unable to persist cart to localStorage', e);
     }
   }, [cartItems]);
 
@@ -65,15 +84,26 @@ export default function App() {
     try {
       localStorage.setItem('karighor_wishlist', JSON.stringify(wishlistIds));
     } catch (e) {
-      console.error(e);
+      console.warn('Unable to persist wishlist to localStorage', e);
     }
   }, [wishlistIds]);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
   const showToast = (text: string, icon: 'cart' | 'wishlist' = 'cart') => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
     setToastMessage({ text, icon });
-    setTimeout(() => {
+    toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
-    }, 2500);
+    }, 2800);
   };
 
   const handleNavigate = (page: PageView) => {

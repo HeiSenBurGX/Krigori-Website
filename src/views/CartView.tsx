@@ -234,6 +234,7 @@ export const CartView: React.FC<CartViewProps> = ({
               <form onSubmit={handleApplyCoupon} className="flex gap-2">
                 <input
                   type="text"
+                  maxLength={20}
                   placeholder="e.g. BENGAL10"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}

@@ -127,6 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <Search className="w-4 h-4 text-[#736B66] mr-2 shrink-0" />
                   <input
                     type="text"
+                    maxLength={80}
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
                     placeholder="Search bangles..."
