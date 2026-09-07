@@ -1,0 +1,6 @@
+{
+  "name": "Karighor Bangles Bangladesh",
+  "description": "Handmade artisan bangles from Bangladesh featuring traditional glass churi, terracotta, nakshi brass, and bridal kankan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

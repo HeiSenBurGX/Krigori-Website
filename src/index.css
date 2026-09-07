@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --color-polish-canvas: #FCFAF7;
+  --color-polish-dark: #332D2D;
+  --color-polish-terracotta: #8C4A32;
+  --color-polish-terracotta-hover: #723C29;
+  --color-polish-sand: #F2EDE4;
+  --color-polish-border: #E8E2D9;
+  --color-polish-green: #2D463E;
+  --color-polish-flame: #C05E42;
+  --color-polish-muted: #5C5552;
+  --color-polish-tertiary: #736B66;
+  --color-polish-subtle: #A69E97;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  background-color: #FCFAF7;
+  color: #332D2D;
+  margin: 0;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: "Playfair Display", Georgia, serif;
+}
