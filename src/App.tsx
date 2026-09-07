@@ -212,7 +212,7 @@ export default function App() {
       
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#332D2D] text-white px-4 py-3 rounded-full shadow-xl border border-[#4D4545] flex items-center gap-2.5 text-xs font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 max-w-sm">
+        <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-[#332D2D] text-white px-4 py-3 rounded-full shadow-xl border border-[#4D4545] flex items-center gap-2.5 text-xs font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 max-w-sm">
           {toastMessage.icon === 'wishlist' ? (
             <Heart className="w-4 h-4 text-rose-400 fill-rose-400 shrink-0" />
           ) : (
@@ -234,10 +234,14 @@ export default function App() {
         onOpenSearch={() => {
           handleNavigate('shop');
         }}
+        onSelectCategory={(cat) => {
+          handleSelectCategory(cat);
+          handleNavigate('shop');
+        }}
       />
 
       {/* Page Content */}
-      <div className="flex-1">
+      <div className="flex-1 pb-16 lg:pb-0">
         {currentPage === 'home' && (
           <HomeView
             products={BANGLES_PRODUCTS}
